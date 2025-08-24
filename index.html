@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalamoon</title>
+    
+    <link rel="icon" type="image/png" href="logo.png">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* Importazione Font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+        /* * =========================================
+         * VARIABILI CSS PER TEMA LIGHT E DARK
+         * ========================================= */
+        :root {
+            --font-family: 'Inter', sans-serif;
+            
+            /* Tema Light (Default) */
+            --bg-color: #FBF9F1;
+            --surface-color: #FFFFFF;
+            --text-color: #3D352E;
+            --text-muted-color: #786A5F;
+            --border-color: #EAE5D9;
+            --primary-color: #5A4D41; /* Marrone scuro del logo */
+            --accent-color: #A0DDE6; /* Ciano chiaro */
+            --accent-hover-color: #8ECED9;
+        }
+
+        body.dark-mode {
+            /* Tema Dark */
+            --bg-color: #1c1c1c;
+            --surface-color: #242424;
+            --text-color: #EAE5D9;
+            --text-muted-color: #9E9186;
+            --border-color: #3a3a3a;
+            --primary-color: #FBF9F1; /* Beige come primario nel dark mode */
+            --accent-color: #A0DDE6; /* Ciano chiaro */
+            --accent-hover-color: #B2E5EE;
+        }
+
+        /* * =========================================
+         * STILI GLOBALI E RESET
+         * ========================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+        
+        /* * =========================================
+         * HEADER E HAMBURGER MENU
+         * ========================================= */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            z-index: 900;
+            padding: 0 20px;
+        }
+        
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .menu-toggle {
+            position: absolute;
+            top: 8px;
+            left: 15px;
+            z-index: 1001;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+        .menu-toggle svg {
+            stroke: var(--primary-color);
+        }
+
+        /* * =========================================
+         * SIDEBAR (MENU LATERALE)
+         * ========================================= */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 260px;
+            height: 100vh;
+            background-color: var(--bg-color);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 1000;
+        }
+        .sidebar.is-open {
+            transform: translateX(0);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 1.5rem 0.5rem;
+        }
+        .logo-container img {
+            width: 40px;
+        }
+        .logo-container .title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .menu {
+            list-style-type: none;
+            flex-grow: 1;
+            margin-top: 1rem;
+        }
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-muted-color);
+            font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .menu-item a:hover {
+            color: var(--text-color);
+            background-color: var(--border-color);
+        }
+        /* Aumento del contrasto per l'elemento attivo */
+        .menu-item a.active {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            font-weight: 600;
+        }
+        .menu-item a.active svg {
+            stroke: var(--bg-color);
+        }
+        .menu-item svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-muted-color);
+            transition: stroke 0.2s ease;
+        }
+        
+        .theme-toggle-container {
+            padding: 1.5rem 0.5rem;
+            margin-top: auto;
+            margin-bottom: 1rem;
+        }
+        #theme-toggle {
+            width: 100%;
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 0.7rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #theme-toggle svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--text-muted-color);
+        }
+        .dark-mode #sun-icon { display: block; }
+        .dark-mode #moon-icon { display: none; }
+        body:not(.dark-mode) #sun-icon { display: none; }
+        body:not(.dark-mode) #moon-icon { display: block; }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        .overlay.is-open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* * =========================================
+         * AREA CONTENUTI PRINCIPALE
+         * ========================================= */
+        .main-content {
+            padding: 6rem 2rem 5rem;
+            width: 100%;
+            margin-left: 0;
+            transition: margin-left 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeIn 0.6s ease;
+        }
+        .content-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .editable-area {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 2.5rem 3rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            min-height: calc(100vh - 200px);
+            background-color: var(--surface-color);
+            line-height: 1.7;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        body.dark-mode .editable-area {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .editable-area:focus {
+            outline: 2px solid var(--accent-color);
+        }
+        
+        /* Stili specifici per i modelli */
+        .editable-area h2 { margin-bottom: 1.5rem; color: var(--primary-color); }
+        .editable-area h3 { margin-top: 1.5rem; margin-bottom: 0.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3rem; color: var(--text-color); }
+        .editable-area p { margin-bottom: 1rem; }
+        .editable-area strong { color: var(--text-color); font-weight: 600; }
+        
+        #fattura table, #tabella table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 1rem; 
+            border: 1px solid var(--border-color);
+        }
+        #fattura th, #fattura td, #tabella th, #tabella td { 
+            border: 1px solid var(--border-color); 
+            padding: 0.8rem; 
+            text-align: left; 
+        }
+        #fattura th, #tabella th { background-color: var(--bg-color); }
+        .cv-section { 
+            margin-bottom: 1.5rem; 
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .job, .education { margin-bottom: 1rem; }
+
+        /* Stili per la stampa PDF */
+        @media print {
+            .editable-area {
+                border: 1px solid #000;
+                box-shadow: none;
+            }
+            #fattura table, #tabella table, #fattura th, #fattura td, #tabella th, #tabella td {
+                border: 1px solid #000 !important;
+            }
+            .cv-section {
+                border-bottom: 1px solid #000 !important;
+            }
+        }
+
+        /* * =========================================
+         * AREA DISEGNO
+         * ========================================= */
+        #drawing-canvas {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: crosshair;
+            touch-action: none;
+            background-color: white;
+        }
+        .drawing-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            padding: 0.8rem;
+            background: var(--surface-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .color-swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid var(--border-color); transition: transform 0.2s ease; }
+        .color-swatch:hover { transform: scale(1.15); }
+        .color-swatch.active { border-color: var(--accent-color); box-shadow: 0 0 0 2px var(--accent-color); }
+        .tool-group { display: flex; align-items: center; gap: 0.5rem; }
+        .tool-group label { font-size: 0.9rem; color: var(--text-muted-color); }
+        #brush-size { cursor: pointer; }
+        #clear-canvas { margin-left: auto; background: none; border: 1px solid var(--border-color); color: var(--text-color); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 500; }
+
+        /* * =========================================
+         * STATUS BAR
+         * ========================================= */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--surface-color);
+            border-top: 1px solid var(--border-color);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            z-index: 500;
+        }
+        .status-bar button {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        .status-bar button:hover { opacity: 0.85; }
+
+        /* * =========================================
+         * RESPONSIVE DESIGN
+         * ========================================= */
+        @media (max-width: 768px) {
+            .header {
+                height: 50px;
+            }
+            
+            .header-title {
+                font-size: 1.2rem;
+            }
+            
+            .menu-toggle {
+                top: 3px;
+                left: 10px;
+                width: 38px;
+                height: 38px;
+            }
+            
+            .main-content {
+                padding: 5rem 1rem 4rem 1rem;
+            }
+            .editable-area {
+                padding: 1.5rem;
+                min-height: calc(100vh - 180px);
+            }
+            
+            /* Tabella responsive per mobile */
+            #fattura table, #tabella table {
+                display: block;
+                overflow-x: auto;
+                width: 100%;
+                font-size: 0.9rem;
+            }
+            
+            #fattura th, #fattura td, #tabella th, #tabella td {
+                padding: 0.5rem;
+            }
+            
+            .status-bar {
+                padding: 0.5rem 1rem;
+                gap: 0.5rem;
+            }
+            .status-bar button {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.85rem;
+            }
+            .drawing-toolbar {
+                gap: 0.8rem;
+            }
+            
+            /* Miglioramento del tema toggle per mobile */
+            .theme-toggle-container {
+                padding: 1rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    
+    <div class="header">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Apri menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <h1 class="header-title">Kalamoon</h1>
+    </div>
+    
+    <div class="overlay" id="overlay"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="logo-container">
+            <img src="logo.png" alt="Kalamoon Logo">
+            <h1 class="title">Kalamoon</h1>
+        </div>
+
+        <ul class="menu">
+            <li class="menu-item"><a href="#" class="menu-link active" data-target="lettera">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                Lettera
+            </a></li>
+            <li class="menu-item"><a href="#" class="menu-link" data-target="fattura">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Fattura
+            </a></li>
+            <li class="menu-item"><a href="#" class="menu-link" data-target="tabella">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+                Tabella
+            </a></li>
+            <li class="menu-item"><a href="#" class="menu-link" data-target="curriculum">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+                Curriculum
+            </a></li>
+            <li class="menu-item"><a href="#" class="menu-link" data-target="disegno">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" /></svg>
+                Disegno
+            </a></li>
+        </ul>
+
+        <div class="theme-toggle-container">
+            <button id="theme-toggle" aria-label="Cambia tema">
+                <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            </button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+
+        <section id="lettera" class="content-section active">
+            <div class="editable-area" contenteditable="true">
+                <p><strong>[Il tuo nome]</strong><br>
+                [Il tuo indirizzo]<br>
+                [La tua città, CAP]<br>
+                [La tua email] | [Il tuo telefono]</p>
+                <br>
+                <p>[Data]</p>
+                <br>
+                <p><strong>[Nome del destinatario]</strong><br>
+                [Titolo del destinatario]<br>
+                [Nome dell'azienda]<br>
+                [Indirizzo dell'azienda]</p>
+                <br>
+                <p><strong>Oggetto: Scrivi qui l'oggetto della lettera</strong></p>
+                <br>
+                <p>Gentile [Sig./Sig.ra] [Cognome del destinatario],</p>
+                <br>
+                <p>Scrivi aqui il corpo della tua lettera. Puoi modificare questo testo come preferisci. Inizia a descrivere lo scopo della tua comunicazione in modo chiaro e conciso.</p>
+                <br>
+                <p>In questo paragrafo, puoi approfondire i dettagli. Aggiungi tutte le informazioni necessarie per supportare il tuo messaggio principale.</p>
+                <br>
+                <p>Concludi la lettera con un riassunto o una call to action. Ad esempio, puoi richiedere un incontro o una risposta.</p>
+                <br>
+                <p>Cordiali saluti,</p>
+                <br>
+                <p>[Il tuo nome]</p>
+            </div>
+        </section>
+
+        <section id="fattura" class="content-section">
+            <div class="editable-area" contenteditable="true">
+                <h2>FATTURA</h2>
+                <p><strong>Fattura n°:</strong> 001-2025</p>
+                <p><strong>Data:</strong> 24 Agosto 2025</p>
+                <hr style="margin: 1rem 0; border-color: var(--border-color);">
+                <p><strong>Da:</strong><br>[La tua azienda]<br>[Il tuo indirizzo]<br>[La tua P.IVA]</p>
+                <br>
+                <p><strong>A:</strong><br>[Nome Cliente]<br>[Indirizzo Cliente]<br>[P.IVA / CF Cliente]</p>
+                <hr style="margin: 1rem 0; border-color: var(--border-color);">
+                 <table>
+                    <thead>
+                        <tr>
+                            <th>Descrizione</th>
+                            <th>Quantità</th>
+                            <th>Prezzo Unitario</th>
+                            <th>Totale</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Progettazione Sito Web</td>
+                            <td>1</td>
+                            <td>€ 1500.00</td>
+                            <td>€ 1500.00</td>
+                        </tr>
+                        <tr>
+                            <td>Sviluppo E-commerce</td>
+                            <td>1</td>
+                            <td>€ 2500.00</td>
+                            <td>€ 2500.00</td>
+                        </tr>
+                         <tr>
+                            <td>Manutenzione Annuale</td>
+                            <td>1</td>
+                            <td>€ 500.00</td>
+                            <td>€ 500.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br>
+                <p style="text-align: right;"><strong>Subtotale:</strong> € 4500.00</p>
+                <p style="text-align: right;"><strong>IVA (22%):</strong> € 990.00</p>
+                <h3 style="text-align: right; border: none;">TOTALE: € 5490.00</h3>
+            </div>
+        </section>
+
+        <section id="tabella" class="content-section">
+            <div class="editable-area" contenteditable="true">
+                <h2>Inventario Prodotti</h2>
+                <p>Questa tabella mostra lo stato attuale dell'inventario. Modifica i valori secondo necessità.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome Prodotto</th>
+                            <th>Categoria</th>
+                            <th>Prezzo</th>
+                            <th>In Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Laptop Pro 15"</td>
+                            <td>Elettronica</td>
+                            <td>€ 1200.00</td>
+                            <td>Sì</td>
+                        </tr>
+                        <tr>
+                            <td>Mouse Wireless</td>
+                            <td>Accessori</td>
+                            <td>€ 25.00</td>
+                            <td>Sì</td>
+                        </tr>
+                         <tr>
+                            <td>Tastiera Meccanica</td>
+                            <td>Accessori</td>
+                            <td>€ 80.00</td>
+                            <td>No</td>
+                        </tr>
+                         <tr>
+                            <td>Monitor 4K 27"</td>
+                            <td>Elettronica</td>
+                            <td>€ 450.00</td>
+                            <td>Sì</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="curriculum" class="content-section">
+            <div class="editable-area" contenteditable="true">
+                <div style="text-align: center;">
+                    <h2 style="margin-bottom: 0.5rem;">Mario Rossi</h2>
+                    <p>Via Roma 1, 20121 Milano (MI) | mario.rossi@email.com | 333 1234567 | linkedin.com/in/mariorossi</p>
+                </div>
+
+                <div class="cv-section">
+                    <h3>Profilo Professionale</h3>
+                    <p>Sviluppatore Web con oltre 5 anni di esperienza nella progettazione, sviluppo e manutenzione di applicazioni web responsive e user-friendly. Specializzato in JavaScript, React e Node.js, con una forte passione per la creazione di esperienze digitali performanti e intuitive.</p>
+                </div>
+                
+                <div class="cv-section">
+                    <h3>Esperienza Lavorativa</h3>
+                    <div class="job">
+                        <p><strong>Front-end Developer</strong> | Tech Solutions S.p.A, Milano</p>
+                        <p><i>Settembre 2021 - Presente</i></p>
+                        <p>- Sviluppo e manutenzione dell'interfaccia utente per la piattaforma SaaS aziendale utilizzando React e TypeScript.</p>
+                        <p>- Collaborazione con i team di UI/UX per tradurre i design in codice di alta qualità.</p>
+                    </div>
+                    <div class="job">
+                        <p><strong>Junior Web Developer</strong> | Web Agency S.r.l, Roma</p>
+                        <p><i>Giugno 2019 - Agosto 2021</i></p>
+                        <p>- Realizzazione di siti web for clienti di piccole e medie imprese utilizzando HTML, CSS e JavaScript.</p>
+                    </div>
+                </div>
+
+                <div class="cv-section">
+                    <h3>Istruzione e Formazione</h3>
+                     <div class="education">
+                        <p><strong>Laurea Triennale in Ingegneria Informatica</strong> | Politecnico di Milano</p>
+                        <p><i>2016 - 2019</i></p>
+                    </div>
+                </div>
+                
+                <div class="cv-section">
+                    <h3>Competenze</h3>
+                    <p><strong>Linguaggi:</strong> JavaScript (ES6+), TypeScript, HTML5, CSS3/Sass</p>
+                    <p><strong>Framework e Librerie:</strong> React, Node.js, Express.js</p>
+                    <p><strong>Strumenti:</strong> Git, Webpack, Docker, Figma</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="disegno" class="content-section">
+            <div class="drawing-toolbar">
+                <div class="tool-group">
+                    <label>Colori:</label>
+                    <div class="color-swatch active" data-color="#3D352E" style="background-color: #3D352E;"></div>
+                    <div class="color-swatch" data-color="#A0DDE6" style="background-color: #A0DDE6;"></div>
+                    <div class="color-swatch" data-color="#F5B5AC" style="background-color: #F5B5AC;"></div>
+                    <div class="color-swatch" data-color="#A8D8B9" style="background-color: #A8D8B9;"></div>
+                    <div class="color-swatch" data-color="#F3D58B" style="background-color: #F3D58B;"></div>
+                    <div class="color-swatch" data-color="#FFFFFF" style="background-color: #FFFFFF;"></div>
+                </div>
+                <div class="tool-group">
+                    <label for="brush-size">Dimensione:</label>
+                    <input type="range" id="brush-size" min="1" max="50" value="5">
+                </div>
+                <button id="clear-canvas">Pulisci</button>
+            </div>
+            <canvas id="drawing-canvas"></canvas>
+        </section>
+
+    </main>
+    
+    <footer class="status-bar">
+        <button id="save-pdf">Salva in PDF</button>
+        <button id="save-txt">Salva in Testo</button>
+        <button id="save-md">Salva in MD</button>
+        <button id="save-image" style="display: none;">Salva in Immagine</button>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const themeToggle = document.getElementById('theme-toggle');
+    const menuLinks = document.querySelectorAll('.menu-link');
+    const contentSections = document.querySelectorAll('.content-section');
+    
+    // Pulsanti di salvataggio
+    const savePdfBtn = document.getElementById('save-pdf');
+    const saveTxtBtn = document.getElementById('save-txt');
+    const saveMdBtn = document.getElementById('save-md');
+    const saveImageBtn = document.getElementById('save-image');
+    const regularSaveButtons = [savePdfBtn, saveTxtBtn, saveMdBtn];
+
+    // ================== LOGICA MENU HAMBURGER ==================
+    const toggleMenu = () => {
+        sidebar.classList.toggle('is-open');
+        overlay.classList.toggle('is-open');
+    };
+    menuToggle.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    // ================== LOGICA CAMBIO TEMA ==================
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme) document.body.classList.add(currentTheme);
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark-mode' : 'light-mode');
+    });
+
+    // ================== LOGICA NAVIGAZIONE E GESTIONE PULSANTI SALVATAGGIO ==================
+    menuLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            menuLinks.forEach(l => l.classList.remove('active'));
+            contentSections.forEach(s => s.classList.remove('active'));
+            link.classList.add('active');
+            const targetId = link.getAttribute('data-target');
+            document.getElementById(targetId).classList.add('active');
+            
+            // Gestione visibilità pulsanti di salvataggio
+            if (targetId === 'disegno') {
+                regularSaveButtons.forEach(btn => btn.style.display = 'none');
+                saveImageBtn.style.display = 'inline-block';
+                initCanvas();
+            } else {
+                regularSaveButtons.forEach(btn => btn.style.display = 'inline-block');
+                saveImageBtn.style.display = 'none';
+            }
+
+            if (window.innerWidth <= 768) toggleMenu();
+        });
+    });
+    
+    // ================== LOGICA AREA DISEGNO ==================
+    const canvas = document.getElementById('drawing-canvas');
+    const colorSwatches = document.querySelectorAll('.color-swatch');
+    const brushSizeSlider = document.getElementById('brush-size');
+    const clearButton = document.getElementById('clear-canvas');
+    let ctx, drawing = false, lastX = 0, lastY = 0, hue = 0;
+
+    function initCanvas() {
+        if (!canvas) return;
+        ctx = canvas.getContext('2d');
+        const container = canvas.parentElement;
+        canvas.width = container.offsetWidth;
+        canvas.height = window.innerHeight * 0.6;
+        ctx.strokeStyle = document.querySelector('.color-swatch.active').dataset.color;
+        ctx.lineWidth = brushSizeSlider.value;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.lineWidth = 5;
+    }
+    
+    function draw(e) {
+        if (!drawing) return;
+        e.preventDefault();
+        
+        let x, y;
+        if (e.type.includes('touch')) {
+            x = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+            y = e.touches[0].clientY - canvas.getBoundingClientRect().top;
+        } else {
+            x = e.offsetX;
+            y = e.offsetY;
+        }
+        
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        [lastX, lastY] = [x, y];
+        
+        hue++;
+        if (hue >= 360) {
+            hue = 0;
+        }
+    }
+
+    function startDrawing(e) {
+        drawing = true;
+        if (e.type.includes('touch')) {
+            lastX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+            lastY = e.touches[0].clientY - canvas.getBoundingClientRect().top;
+        } else {
+            lastX = e.offsetX;
+            lastY = e.offsetY;
+        }
+        e.preventDefault();
+    }
+
+    function stopDrawing() {
+        drawing = false;
+    }
+
+    if (canvas) {
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        window.addEventListener('resize', initCanvas);
+    }
+
+    colorSwatches.forEach(swatch => swatch.addEventListener('click', () => {
+        colorSwatches.forEach(s => s.classList.remove('active'));
+        swatch.classList.add('active');
+        ctx.strokeStyle = swatch.dataset.color;
+    }));
+    
+    brushSizeSlider.addEventListener('input', () => ctx.lineWidth = brushSizeSlider.value);
+    clearButton.addEventListener('click', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
+
+    // ================== LOGICA SALVATAGGIO DOCUMENTI ==================
+    const getActiveContentElement = () => document.querySelector('.content-section.active .editable-area');
+    
+    // Salva in formato testo
+    saveTxtBtn.addEventListener('click', () => {
+        const contentEl = getActiveContentElement();
+        if (contentEl) {
+            const content = contentEl.innerText;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Kalamoon_Document.txt';
+            a.click();
+        }
+    });
+    
+    // Salva in formato Markdown
+    saveMdBtn.addEventListener('click', () => {
+        const contentEl = getActiveContentElement();
+        if (contentEl) {
+            const content = contentEl.innerText;
+            const blob = new Blob([content], { type: 'text/markdown' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Kalamoon_Document.md';
+            a.click();
+        }
+    });
+    
+    // ===== INIZIO BLOCCO CODICE MODIFICATO =====
+    // Salva in formato PDF (versione corretta)
+    savePdfBtn.addEventListener('click', () => {
+        const element = getActiveContentElement();
+        if (!element) return;
+
+        // Clona l'elemento per evitare modifiche al DOM originale
+        const elementCopy = element.cloneNode(true);
+        
+        // Applica stili per la generazione del PDF
+        elementCopy.style.width = '100%';
+        elementCopy.style.maxWidth = '800px';
+        elementCopy.style.margin = '0 auto'; // Centra l'elemento
+        elementCopy.style.padding = '20px';
+        elementCopy.style.boxSizing = 'border-box';
+        elementCopy.style.backgroundColor = '#fff';
+        elementCopy.style.fontFamily = 'Inter, sans-serif';
+        elementCopy.style.fontSize = '14px';
+        elementCopy.style.lineHeight = '1.6';
+        elementCopy.style.border = 'none'; // Rimuove il bordo esterno
+        elementCopy.style.boxShadow = 'none'; // Rimuove l'ombra
+
+        // Imposta il colore del testo a nero per tutti gli elementi figli
+        const allChildren = elementCopy.querySelectorAll('*');
+        allChildren.forEach(child => {
+            child.style.color = '#000';
+            // Assicura che i bordi interni come quelli delle sezioni CV siano neri
+            if (window.getComputedStyle(child).getPropertyValue('border-bottom-color') !== 'rgba(0, 0, 0, 0)') {
+                 child.style.borderBottomColor = '#000';
+            }
+             if (window.getComputedStyle(child).getPropertyValue('border-top-color') !== 'rgba(0, 0, 0, 0)') {
+                 child.style.borderTopColor = '#000';
+            }
+        });
+        
+        // Aggiungi bordi neri alle tabelle per la stampa
+        const tables = elementCopy.querySelectorAll('table');
+        tables.forEach(table => {
+            table.style.border = '1px solid #000';
+            table.style.borderCollapse = 'collapse';
+            table.style.width = '100%';
+            table.style.marginBottom = '15px';
+            table.style.breakInside = 'avoid';
+            
+            const ths = table.querySelectorAll('th');
+            ths.forEach(th => {
+                th.style.border = '1px solid #000';
+                th.style.padding = '8px';
+                th.style.backgroundColor = '#f0f0f0';
+                th.style.fontWeight = 'bold';
+                th.style.color = '#000';
+            });
+            
+            const tds = table.querySelectorAll('td');
+            tds.forEach(td => {
+                td.style.border = '1px solid #000';
+                td.style.padding = '8px';
+                td.style.color = '#000';
+            });
+        });
+        
+        // Nascondi temporaneamente l'elemento originale e aggiungi la copia
+        const originalDisplay = element.style.display;
+        element.style.display = 'none';
+        document.body.appendChild(elementCopy);
+        
+        const opt = {
+            margin: [10, 0, 10, 0], // Margini [top, right, bottom, left] per centrare
+            filename: 'Kalamoon_Document.pdf',
+            image: { 
+                type: 'jpeg', 
+                quality: 0.98 
+            },
+            html2canvas: { 
+                scale: 2,
+                useCORS: true,
+                backgroundColor: null, // Sfondo trasparente per far vedere quello del body
+                logging: false,
+                windowWidth: elementCopy.scrollWidth,
+                windowHeight: elementCopy.scrollHeight
+            },
+            jsPDF: { 
+                unit: 'mm', 
+                format: 'a4', 
+                orientation: 'portrait',
+                compress: true
+            },
+            pagebreak: { 
+                mode: ['avoid-all', 'css', 'legacy']
+            }
+        };
+
+        // Crea il PDF
+        html2pdf().set(opt).from(elementCopy).save().then(() => {
+            // Ripristina l'elemento originale e rimuovi la copia
+            element.style.display = originalDisplay;
+            document.body.removeChild(elementCopy);
+        }).catch(error => {
+            console.error('Errore nella generazione del PDF:', error);
+            element.style.display = originalDisplay;
+            if (document.body.contains(elementCopy)) {
+                document.body.removeChild(elementCopy);
+            }
+        });
+    });
+    // ===== FINE BLOCCO CODICE MODIFICATO =====
+
+    // Salva disegno come immagine
+    saveImageBtn.addEventListener('click', () => {
+        const dataURL = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = dataURL;
+        a.download = 'Kalamoon_Disegno.png';
+        a.click();
+    });
+
+    // Inizializza il canvas se siamo nella sezione disegno
+    if (document.getElementById('disegno').classList.contains('active')) {
+        initCanvas();
+        regularSaveButtons.forEach(btn => btn.style.display = 'none');
+        saveImageBtn.style.display = 'inline-block';
+    }
+});
+</script>
+
+</body>
+</html>
